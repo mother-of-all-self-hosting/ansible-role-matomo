@@ -40,10 +40,9 @@ matomo_http_bind_port: ''
 matomo_container_network: "{{ matomo_identifier }}"
 
 # A list of additional container networks that the container would be connected to.
-# The playbook does not create these networks, so make sure they already exist.
+# The role does not create these networks, so make sure they already exist.
+# Use this to expose this container to another reverse proxy, which runs in a different container network.
 matomo_container_additional_networks: "{{ matomo_container_additional_networks_auto + matomo_container_additional_networks_custom }}"
-# matomo_container_additional_networks_auto is reserved for usage by the playbook.
-# Your custom networks should go into matomo_container_additional_networks_custom.
 matomo_container_additional_networks_auto: []
 matomo_container_additional_networks_custom: []
 
