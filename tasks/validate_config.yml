@@ -15,6 +15,10 @@
     - { "old": "matomo_data_dir_path", "new": "matomo_data_path" }
     - { "old": "matomo_http_bind_port", "new": "matomo_container_http_host_bind_port" }
     - { "old": "matomo_http_header_content_permission_policy", "new": "matomo_http_header_permissions_policy" }
+    - { "old": "matomo_systemd_required_systemd_services_list", "new": "matomo_systemd_required_services_list" }
+    - { "old": "matomo_systemd_required_systemd_services_list_default", "new": "matomo_systemd_required_services_list_default" }
+    - { "old": "matomo_systemd_required_systemd_services_list_auto", "new": "matomo_systemd_required_services_list_auto" }
+    - { "old": "matomo_systemd_required_systemd_services_list_custom", "new": "matomo_systemd_required_services_list_custom" }
 
 - name: Fail if required matomo settings not defined
   ansible.builtin.fail:

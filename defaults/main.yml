@@ -154,10 +154,17 @@ matomo_floc_optout_enabled: true
 # See: `matomo_http_header_strict_transport_security`
 matomo_hsts_preload_enabled: false
 
-matomo_systemd_required_systemd_services_list: "{{ matomo_systemd_required_systemd_services_list_default + matomo_systemd_required_systemd_services_list_auto + matomo_systemd_required_systemd_services_list_custom }}"
-matomo_systemd_required_systemd_services_list_default: "{{ [devture_systemd_docker_base_docker_service_name] if devture_systemd_docker_base_docker_service_name else [] }}"
-matomo_systemd_required_systemd_services_list_auto: []
-matomo_systemd_required_systemd_services_list_custom: []
+# List of systemd services that the Matomo systemd service depends on
+matomo_systemd_required_services_list: "{{ matomo_systemd_required_services_list_default + matomo_systemd_required_services_list_auto + matomo_systemd_required_services_list_custom }}"
+matomo_systemd_required_services_list_default: "{{ [devture_systemd_docker_base_docker_service_name] if devture_systemd_docker_base_docker_service_name else [] }}"
+matomo_systemd_required_services_list_auto: []
+matomo_systemd_required_services_list_custom: []
+
+# List of systemd services that the Matomo systemd service wants
+matomo_systemd_wanted_services_list: "{{ matomo_systemd_wanted_services_list_default + matomo_systemd_wanted_services_list_auto + matomo_systemd_wanted_services_list_custom }}"
+matomo_systemd_wanted_services_list_default: []
+matomo_systemd_wanted_services_list_auto: []
+matomo_systemd_wanted_services_list_custom: []
 
 # Matomo only supports Mysql/Mariadb
 matomo_config_database_adapter: mysql
