@@ -5,7 +5,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 ---
-
 - name: Check existence of Matomo systemd service
   ansible.builtin.stat:
     path: "{{ devture_systemd_docker_base_systemd_path }}/{{ matomo_identifier }}.service"
@@ -21,12 +20,27 @@
         enabled: false
         daemon_reload: true
 
-    - name: Ensure Matomo systemd service does not exists
+    - name: Ensure Matomo systemd service does not exist
       ansible.builtin.file:
         path: "{{ devture_systemd_docker_base_systemd_path }}/{{ matomo_identifier }}.service"
         state: absent
 
-    - name: Ensure Matomo path doesn't exist
+    - name: Ensure Matomo container network does not exist via community.docker.docker_network
+      when: devture_systemd_docker_base_container_network_creation_method == 'ansible-module'
+      community.docker.docker_network:
+        name: "{{ matomo_container_network }}"
+        state: absent
+
+    - name: Ensure Matomo container network does not exist via ansible.builtin.command
+      when: devture_systemd_docker_base_container_network_creation_method == 'command'
+      ansible.builtin.command:
+        cmd: >-
+          {{ devture_systemd_docker_base_host_command_docker }} network rm
+          {{ matomo_container_network }}
+      register: network_deletion_result
+      changed_when: matomo_container_network in network_deletion_result.stdout
+
+    - name: Ensure Matomo path does not exist
       ansible.builtin.file:
         path: "{{ matomo_base_path }}"
         state: absent
