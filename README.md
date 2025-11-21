@@ -8,7 +8,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 # Matomo Ansible role
 
-This is an [Ansible](https://www.ansible.com/) role which installs [Matomo](https://hub.docker.com/_/matomo/) to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
+This is an [Ansible](https://www.ansible.com/) role which installs [Matomo](https://matomo.org/) to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
 
 This role *implicitly* depends on:
 

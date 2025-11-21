@@ -18,14 +18,11 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 # Setting up Matomo
 
-This is an [Ansible](https://www.ansible.com/) role which installs [Matomo](https://www.matomo.org) to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
+This is an [Ansible](https://www.ansible.com/) role which installs [Matomo](https://matomo.org/) to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
 
-Matomo is a feature-rich free software for web based forms and surveys, which supports extensive survey logic.
+Matomo is a leading open-source web analytics platform that gives you full data ownership.
 
-See the project's [documentation](https://www.matomo.org/manual/Matomo_Manual) to learn what Matomo does and why it might be useful to you.
-
->[!NOTE]
-> Since the developer team behind Matomo [declared](https://bugs.matomo.org/view.php?id=14606#c55854) that an official Docker image would not be available, this role uses the image provided by [ACSPRI](https://www.acspri.org.au/matomo), which is a Matomo Authorised Partner for Australia (see [this list](https://www.matomo.com/index.php/hosting) of partners for confirmation).
+See the project's [documentation](https://matomo.org/guides/) to learn what Matomo does and why it might be useful to you.
 
 ## Prerequisites
 
@@ -78,17 +75,6 @@ matomo_database_password: YOUR_MYSQL_SERVER_PASSWORD_HERE
 matomo_database_name: YOUR_MYSQL_SERVER_DATABASE_NAME_HERE
 ```
 
-### Set administrator's account details
-
-You also need to specify administrator's account details by adding the following configuration to your `vars.yml` file:
-
-```yaml
-matomo_environment_variables_admin_user: LIMESURVEY_ADMIN_USERNAME_HERE
-matomo_environment_variables_admin_password: LIMESURVEY_ADMIN_PASSWORD_HERE
-matomo_environment_variables_admin_name: LIMESURVEY_ADMIN_NAME_HERE
-matomo_environment_variables_admin_email: LIMESURVEY_ADMIN_EMAIL_ADDRESS_HERE
-```
-
 ### Extending the configuration
 
 There are some additional things you may wish to configure about the component.
@@ -97,7 +83,7 @@ Take a look at:
 
 - [`defaults/main.yml`](../defaults/main.yml) for some variables that you can customize via your `vars.yml` file. You can override settings (even those that don't have dedicated playbook variables) using the `matomo_environment_variables_additional_variables` variable
 
-See [the official documentation](https://hub.docker.com/r/acspri/matomo#how-to-use-this-image) for a complete list of Matomo's config options that you could put in `matomo_environment_variables_additional_variables`.
+See [the image's documentation](https://hub.docker.com/_/matomo/#matomo-installation) for a complete list of Matomo's config options that you could put in `matomo_environment_variables_additional_variables`.
 
 ## Installing
 
@@ -113,18 +99,10 @@ If you use the MASH playbook, the shortcut commands with the [`just` program](ht
 
 After running the command for installation, Matomo becomes available at the specified hostname like `https://example.com`.
 
-To get started, open the URL `https://example.com/index.php/admin` with a web browser, and log in to the instance with the administrator account credentials.
+To get started, open the URL with a web browser, and follow the set up wizard.
 
 ## Troubleshooting
 
 ### Check the service's logs
 
 You can find the logs in [systemd-journald](https://www.freedesktop.org/software/systemd/man/systemd-journald.service.html) by logging in to the server with SSH and running `journalctl -fu matomo` (or how you/your playbook named the service, e.g. `mash-matomo`).
-
-#### Increase logging verbosity
-
-If you want to increase the verbosity, add the following configuration to your `vars.yml` file:
-
-```yaml
-matomo_environment_variables_debug: 2
-```
