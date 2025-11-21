@@ -1,16 +1,27 @@
+# SPDX-FileCopyrightText: 2023 - 2024 Nikita Chernyi
+# SPDX-FileCopyrightText: 2023 - 2025 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2024 Julian-Samuel Gebühr
+# SPDX-FileCopyrightText: 2024 Sergio Durigan Junior
+# SPDX-FileCopyrightText: 2025 MASH project contributors
 # SPDX-FileCopyrightText: 2025 Oliver
+# SPDX-FileCopyrightText: 2025 Suguru Hirahara
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 ---
-
 # Project source code URL: https://github.com/matomo-org/matomo
 
 matomo_enabled: true
 
+matomo_identifier: matomo
+matomo_base_path: "/{{ matomo_identifier }}"
+matomo_data_dir_path: "{{ matomo_base_path }}/data"
+matomo_config_dir_path: "{{ matomo_base_path }}/config"
+
 matomo_version: 5.3.1
 
-matomo_identifier: matomo
+matomo_uid: ''
+matomo_gid: ''
 
 matomo_scheme: https
 
@@ -19,35 +30,22 @@ matomo_hostname: ''
 
 matomo_path_prefix: /
 
-matomo_uid: ''
-matomo_gid: ''
-
 matomo_container_image: "{{ matomo_container_image_registry_prefix }}matomo:{{ matomo_container_image_tag }}"
 matomo_container_image_tag: "{{ matomo_version }}"
 matomo_container_image_force_pull: "{{ matomo_container_image.endswith(':latest') }}"
 matomo_container_image_registry_prefix: docker.io/
 
-matomo_base_path: "/{{ matomo_identifier }}"
-matomo_data_dir_path: "{{ matomo_base_path }}/data"
-matomo_config_dir_path: "{{ matomo_base_path }}/config"
-
 matomo_http_bind_port: ''
 
-matomo_systemd_required_systemd_services_list: "{{ matomo_systemd_required_systemd_services_list_default + matomo_systemd_required_systemd_services_list_auto + matomo_systemd_required_systemd_services_list_custom }}"
-matomo_systemd_required_systemd_services_list_default: "{{ [devture_systemd_docker_base_docker_service_name] if devture_systemd_docker_base_docker_service_name else [] }}"
-matomo_systemd_required_systemd_services_list_auto: []
-matomo_systemd_required_systemd_services_list_custom: []
+matomo_container_network: "{{ matomo_identifier }}"
 
-# Matomo only supports Mysql/Mariadb
-matomo_config_database_adapter: mysql
-matomo_config_database_hostname: ''
-matomo_config_database_port: 3306
-matomo_config_database_name: matomo
-matomo_config_database_username: ''
-matomo_config_database_password: ''
-matomo_config_database_tables_prefix: ''
-
-matomo_config_root_url: "{{ matomo_scheme }}://{{ matomo_hostname }}{{ matomo_path_prefix }}"
+# A list of additional container networks that the container would be connected to.
+# The playbook does not create these networks, so make sure they already exist.
+matomo_container_additional_networks: "{{ matomo_container_additional_networks_auto + matomo_container_additional_networks_custom }}"
+# matomo_container_additional_networks_auto is reserved for usage by the playbook.
+# Your custom networks should go into matomo_container_additional_networks_custom.
+matomo_container_additional_networks_auto: []
+matomo_container_additional_networks_custom: []
 
 # matomo_container_labels_traefik_enabled controls whether labels to assist a Traefik reverse-proxy will be attached to the container.
 # See `roles/custom/matomo/templates/labels.j2` for details.
@@ -103,27 +101,6 @@ matomo_container_labels_traefik_additional_response_headers_custom: {}
 #   another.label="here"
 matomo_container_labels_additional_labels: ''
 
-# matomo_container_additional_environment_variables contains a multiline string with additional environment variables to pass to the container.
-#
-# Example:
-# matomo_container_additional_environment_variables: |
-#   VAR=1
-#   ANOTHER=value
-matomo_container_additional_environment_variables: ''
-
-matomo_container_network: "{{ matomo_identifier }}"
-
-# A list of additional container networks that the container would be connected to.
-# The playbook does not create these networks, so make sure they already exist.
-matomo_container_additional_networks: "{{ matomo_container_additional_networks_auto + matomo_container_additional_networks_custom }}"
-# matomo_container_additional_networks_auto is reserved for usage by the playbook.
-# Your custom networks should go into matomo_container_additional_networks_custom.
-matomo_container_additional_networks_auto: []
-matomo_container_additional_networks_custom: []
-
-# Additional environment variables.
-matomo_environment_variables_additional_variables: ''
-
 # Specifies the value of the `X-XSS-Protection` header
 # Stops pages from loading when they detect reflected cross-site scripting (XSS) attacks.
 #
@@ -174,3 +151,30 @@ matomo_floc_optout_enabled: true
 # - https://hstspreload.org/#opt-in
 # See: `matomo_http_header_strict_transport_security`
 matomo_hsts_preload_enabled: false
+
+matomo_systemd_required_systemd_services_list: "{{ matomo_systemd_required_systemd_services_list_default + matomo_systemd_required_systemd_services_list_auto + matomo_systemd_required_systemd_services_list_custom }}"
+matomo_systemd_required_systemd_services_list_default: "{{ [devture_systemd_docker_base_docker_service_name] if devture_systemd_docker_base_docker_service_name else [] }}"
+matomo_systemd_required_systemd_services_list_auto: []
+matomo_systemd_required_systemd_services_list_custom: []
+
+# Matomo only supports Mysql/Mariadb
+matomo_config_database_adapter: mysql
+matomo_config_database_hostname: ''
+matomo_config_database_port: 3306
+matomo_config_database_name: matomo
+matomo_config_database_username: ''
+matomo_config_database_password: ''
+matomo_config_database_tables_prefix: ''
+
+matomo_config_root_url: "{{ matomo_scheme }}://{{ matomo_hostname }}{{ matomo_path_prefix }}"
+
+# matomo_container_additional_environment_variables contains a multiline string with additional environment variables to pass to the container.
+#
+# Example:
+# matomo_container_additional_environment_variables: |
+#   VAR=1
+#   ANOTHER=value
+matomo_container_additional_environment_variables: ''
+
+# Additional environment variables.
+matomo_environment_variables_additional_variables: ''
