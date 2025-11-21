@@ -18,6 +18,7 @@ matomo_base_path: "/{{ matomo_identifier }}"
 matomo_config_path: "{{ matomo_base_path }}/config"
 matomo_data_path: "{{ matomo_base_path }}/data"
 
+# renovate: datasource=docker depName=matomo
 matomo_version: 5.3.1
 
 matomo_uid: ""
