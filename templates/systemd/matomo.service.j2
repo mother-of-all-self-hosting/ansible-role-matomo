@@ -1,5 +1,8 @@
 {#
+SPDX-FileCopyrightText: 2023 Slavi Pantaleev
+SPDX-FileCopyrightText: 2024 Nikita Chernyi
 SPDX-FileCopyrightText: 2025 Oliver
+SPDX-FileCopyrightText: 2025 Suguru Hirahara
 
 SPDX-License-Identifier: GPL-3.0-or-later
 #}
@@ -15,26 +18,26 @@ DefaultDependencies=no
 [Service]
 Type=simple
 Environment="HOME={{ devture_systemd_docker_base_systemd_unit_home_path }}"
-ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} stop --time={{ devture_systemd_docker_base_container_stop_grace_time_seconds }} {{ matomo_identifier }} 2>/dev/null'
+ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} stop -t {{ devture_systemd_docker_base_container_stop_grace_time_seconds }} {{ matomo_identifier }} 2>/dev/null'
 ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} rm {{ matomo_identifier }} 2>/dev/null'
 
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
-			--rm \
-			--name={{ matomo_identifier }} \
-			--log-driver=none \
-			--network={{ matomo_container_network }} \
-			--user={{ matomo_uid }}:{{ matomo_gid }} \
-			--cap-drop=ALL \
-			--tmpfs /var/run/apache2:rw,exec,nosuid,size=100M \
-			--tmpfs /var/log/apache2:rw,exec,nosuid,size=100M \
-			{% if matomo_http_bind_port != '' %}
-			-p {{ matomo_http_bind_port }}:80 \
-			{% endif %}
-			--env-file={{ matomo_base_path }}/env \
-			--label-file={{ matomo_base_path }}/labels \
-			--mount type=bind,src={{ matomo_config_path }},dst=/var/www/html/config \
-			--mount type=bind,src={{ matomo_data_path }},dst=/var/www/html \
-			{{ matomo_container_image }}
+      --rm \
+      --name={{ matomo_identifier }} \
+      --log-driver=none \
+      --network={{ matomo_container_network }} \
+      --user={{ matomo_uid }}:{{ matomo_gid }} \
+      --cap-drop=ALL \
+			{% if matomo_container_http_host_bind_port %}
+      -p {{ matomo_container_http_host_bind_port }}:{{ matomo_container_http_port }} \
+      {% endif %}
+      --env-file={{ matomo_base_path }}/env \
+      --label-file={{ matomo_base_path }}/labels \
+      --mount type=bind,src={{ matomo_config_path }},dst=/var/www/html/config \
+      --mount type=bind,src={{ matomo_data_path }},dst=/var/www/html \
+      --tmpfs /var/run/apache2:rw,exec,nosuid,size=100M \
+      --tmpfs /var/log/apache2:rw,exec,nosuid,size=100M \
+      {{ matomo_container_image }}
 
 {% for network in matomo_container_additional_networks %}
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} network connect {{ network }} {{ matomo_identifier }}
@@ -42,7 +45,7 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} network conne
 
 ExecStart={{ devture_systemd_docker_base_host_command_docker }} start --attach {{ matomo_identifier }}
 
-ExecStop=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} stop --time={{ devture_systemd_docker_base_container_stop_grace_time_seconds }} {{ matomo_identifier }} 2>/dev/null'
+ExecStop=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} stop -t {{ devture_systemd_docker_base_container_stop_grace_time_seconds }} {{ matomo_identifier }} 2>/dev/null'
 ExecStop=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} rm {{ matomo_identifier }} 2>/dev/null'
 Restart=always
 RestartSec=30

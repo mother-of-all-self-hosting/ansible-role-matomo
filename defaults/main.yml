@@ -35,9 +35,15 @@ matomo_container_image_tag: "{{ matomo_version }}"
 matomo_container_image_force_pull: "{{ matomo_container_image.endswith(':latest') }}"
 matomo_container_image_registry_prefix: docker.io/
 
-matomo_http_bind_port: ''
+# Controls whether the container exposes its HTTP port (tcp/80 in the container).
+#
+# Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:2586"), or empty string to not expose.
+matomo_container_http_host_bind_port: ""
 
 matomo_container_network: "{{ matomo_identifier }}"
+
+# The port number in the container
+matomo_container_http_port: 80
 
 # A list of additional container networks that the container would be connected to.
 # The role does not create these networks, so make sure they already exist.
