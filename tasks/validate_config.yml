@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2025 Oliver
+# SPDX-FileCopyrightText: 2025 Suguru Hirahara
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -19,7 +20,8 @@
     - {'name': 'matomo_config_database_password', when: true}
     - {'name': 'matomo_container_labels_traefik_compression_middleware_name', when: "{{ matomo_container_labels_traefik_compression_middleware_enabled }}"}
 
-- when: matomo_container_labels_traefik_enabled | bool
+- name: Run if Traefik is enabled
+  when: matomo_container_labels_traefik_enabled | bool
   block:
     - name: Fail if required matomo Traefik settings not defined
       ansible.builtin.fail:

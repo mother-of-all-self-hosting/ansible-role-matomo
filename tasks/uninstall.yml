@@ -1,4 +1,6 @@
+# SPDX-FileCopyrightText: 2023 Slavi Pantaleev
 # SPDX-FileCopyrightText: 2025 Oliver
+# SPDX-FileCopyrightText: 2025 Suguru Hirahara
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -9,7 +11,8 @@
     path: "{{ devture_systemd_docker_base_systemd_path }}/{{ matomo_identifier }}.service"
   register: matomo_service_stat
 
-- when: matomo_service_stat.stat.exists | bool
+- name: Uninstall Matomo systemd services and files
+  when: matomo_service_stat.stat.exists | bool
   block:
     - name: Ensure Matomo systemd service is stopped
       ansible.builtin.service:

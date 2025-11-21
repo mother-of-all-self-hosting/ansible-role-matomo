@@ -1,24 +1,28 @@
+# SPDX-FileCopyrightText: 2023 Slavi Pantaleev
 # SPDX-FileCopyrightText: 2025 Oliver
+# SPDX-FileCopyrightText: 2025 Suguru Hirahara
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 ---
-
-- block:
-    - when: matomo_enabled | bool
-      ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
-
-    - when: matomo_enabled | bool
-      ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
+- name: Perform Matomo installation tasks
+  when: matomo_enabled | bool
   tags:
     - setup-all
     - setup-matomo
     - install-all
     - install-matomo
+  block:
+    - name: Validate Matomo configuration
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
+    - name: Install Matomo
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
 
-- block:
-    - when: not matomo_enabled | bool
-      ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"
+- name: Perform Matomo uninstallation tasks
+  when: not matomo_enabled | bool
   tags:
     - setup-all
     - setup-matomo
+  block:
+    - name: Uninstall Matomo
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"

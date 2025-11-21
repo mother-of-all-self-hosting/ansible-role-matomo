@@ -1,5 +1,6 @@
 <!--
 SPDX-FileCopyrightText: 2025 Oliver
+SPDX-FileCopyrightText: 2025 Suguru Hirahara
 
 SPDX-License-Identifier: GPL-3.0-or-later
 -->
@@ -20,3 +21,9 @@ For an Ansible playbook which integrates this role and makes it easier to use, s
 ## Support
 
 - Github issues: [acterglobal/ansible-role-matomo/issues](https://github.com/acterglobal/ansible-role-matomo/issues)
+
+## Development
+
+You can optionally install [pre-commit](https://pre-commit.com/) so that simple mistakes are checked and noticed before changes are pushed to a remote branch. See [`.pre-commit-config.yaml`](./.pre-commit-config.yaml) for which hooks are to be executed.
+
+See [this section](https://pre-commit.com/#usage) on the official documentation for usage.
