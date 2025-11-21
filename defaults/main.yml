@@ -26,9 +26,11 @@ matomo_gid: ""
 
 matomo_scheme: https
 
-# The fully-qualified name of your Matomo server (e.g. `matomo.example.com`)
+# The hostname at which Matomo is served
 matomo_hostname: ""
 
+# The path at which Matomo is exposed.
+# This value must either be `/` or not end with a slash (e.g. `/matomo`).
 matomo_path_prefix: /
 
 matomo_container_image: "{{ matomo_container_image_registry_prefix }}matomo:{{ matomo_container_image_tag }}"
@@ -43,6 +45,7 @@ matomo_container_image_force_pull: "{{ matomo_container_image.endswith(':latest'
 # Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:2586"), or empty string to not expose.
 matomo_container_http_host_bind_port: ""
 
+# The base container network. It will be auto-created by this role if it doesn't exist already.
 matomo_container_network: "{{ matomo_identifier }}"
 
 # The port number in the container
@@ -56,7 +59,7 @@ matomo_container_additional_networks_auto: []
 matomo_container_additional_networks_custom: []
 
 # matomo_container_labels_traefik_enabled controls whether labels to assist a Traefik reverse-proxy will be attached to the container.
-# See `roles/custom/matomo/templates/labels.j2` for details.
+# See `../templates/labels.j2` for details.
 #
 # To inject your own other container labels, see `matomo_container_labels_additional_labels`.
 matomo_container_labels_traefik_enabled: true
