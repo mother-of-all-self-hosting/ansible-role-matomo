@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 Oliver
+
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
 # Matomo Ansible Role
 
 Matomo is a self-hosted, open source web analytics application. This role helps you to set up [Matomo's default docker image](https://hub.docker.com/_/matomo/), and configure it for Traefik and MariaDB.
