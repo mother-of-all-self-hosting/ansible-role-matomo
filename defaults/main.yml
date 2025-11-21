@@ -179,7 +179,5 @@ matomo_database_password: ""
 matomo_database_name: matomo
 matomo_database_tables_prefix: matomo_
 
-matomo_config_root_url: "{{ matomo_scheme }}://{{ matomo_hostname }}{{ matomo_path_prefix }}"
-
 # Additional environment variables.
 matomo_environment_variables_additional_variables: ""
