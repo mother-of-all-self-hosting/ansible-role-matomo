@@ -14,6 +14,7 @@
     - { "old": "matomo_config_dir_path", "new": "matomo_config_path" }
     - { "old": "matomo_data_dir_path", "new": "matomo_data_path" }
     - { "old": "matomo_http_bind_port", "new": "matomo_container_http_host_bind_port" }
+    - { "old": "matomo_http_header_content_permission_policy", "new": "matomo_http_header_permissions_policy" }
 
 - name: Fail if required matomo settings not defined
   ansible.builtin.fail:

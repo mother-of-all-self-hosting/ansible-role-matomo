@@ -93,7 +93,7 @@ matomo_container_labels_traefik_additional_response_headers_auto: |
     | combine ({'X-XSS-Protection': matomo_http_header_xss_protection} if matomo_http_header_xss_protection else {})
     | combine ({'X-Content-Type-Options': matomo_http_header_content_type_options} if matomo_http_header_content_type_options else {})
     | combine ({'Content-Security-Policy': matomo_http_header_content_security_policy} if matomo_http_header_content_security_policy else {})
-    | combine ({'Permission-Policy': matomo_http_header_content_permission_policy} if matomo_http_header_content_permission_policy else {})
+    | combine ({'Permissions-Policy': matomo_http_header_permissions_policy} if matomo_http_header_permissions_policy else {})
     | combine ({'Strict-Transport-Security': matomo_http_header_strict_transport_security} if matomo_http_header_strict_transport_security and matomo_container_labels_traefik_tls else {})
   }}
 matomo_container_labels_traefik_additional_response_headers_custom: {}
@@ -125,7 +125,7 @@ matomo_http_header_content_security_policy: frame-ancestors 'self'
 
 # Specifies the value of the `Permission-Policy` header.
 # See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permission-Policy
-matomo_http_header_content_permission_policy: "{{ 'interest-cohort=()' if matomo_floc_optout_enabled else '' }}"
+matomo_http_header_permissions_policy: "{{ 'interest-cohort=()' if matomo_floc_optout_enabled else '' }}"
 
 # Specifies the value of the `Strict-Transport-Security` header.
 # See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
