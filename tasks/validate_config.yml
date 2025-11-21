@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2023 Julian-Samuel Gebühr
+# SPDX-FileCopyrightText: 2023 MASH project contributors
+# SPDX-FileCopyrightText: 2023 - 2025 Slavi Pantaleev
 # SPDX-FileCopyrightText: 2025 Oliver
 # SPDX-FileCopyrightText: 2025 Suguru Hirahara
 #
@@ -53,3 +56,12 @@
       with_items:
         - matomo_container_labels_traefik_hostname
         - matomo_container_labels_traefik_path_prefix
+
+    # We ensure it doesn't end with a slash, because we handle both (slash and no-slash).
+    # Knowing that `matomo_container_labels_traefik_path_prefix` does not end with a slash
+    # ensures we know how to set these routes up without having to do "does it end with a slash" checks elsewhere.
+    - name: Fail if matomo_container_labels_traefik_path_prefix ends with a slash
+      ansible.builtin.fail:
+        msg: >-
+          matomo_container_labels_traefik_path_prefix (`{{ matomo_container_labels_traefik_path_prefix }}`) must either be `/` or not end with a slash (e.g. `/matomo`).
+      when: "matomo_container_labels_traefik_path_prefix != '/' and matomo_container_labels_traefik_path_prefix[-1] == '/'"
