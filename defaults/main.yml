@@ -171,13 +171,13 @@ matomo_systemd_wanted_services_list_auto: []
 matomo_systemd_wanted_services_list_custom: []
 
 # Matomo only supports Mysql/Mariadb
-matomo_config_database_adapter: mysql
-matomo_config_database_hostname: ""
-matomo_config_database_port: 3306
-matomo_config_database_name: matomo
-matomo_config_database_username: ""
-matomo_config_database_password: ""
-matomo_config_database_tables_prefix: ""
+matomo_database_adapter: mysql
+matomo_database_hostname: ""
+matomo_database_port: 3306
+matomo_database_username: matomo
+matomo_database_password: ""
+matomo_database_name: matomo
+matomo_database_tables_prefix: matomo_
 
 matomo_config_root_url: "{{ matomo_scheme }}://{{ matomo_hostname }}{{ matomo_path_prefix }}"
 

@@ -19,6 +19,13 @@
     - { "old": "matomo_systemd_required_systemd_services_list_default", "new": "matomo_systemd_required_services_list_default" }
     - { "old": "matomo_systemd_required_systemd_services_list_auto", "new": "matomo_systemd_required_services_list_auto" }
     - { "old": "matomo_systemd_required_systemd_services_list_custom", "new": "matomo_systemd_required_services_list_custom" }
+    - { "old": "matomo_config_database_hostname", "new": "matomo_database_hostname" }
+    - { "old": "matomo_config_database_port", "new": "matomo_database_port" }
+    - { "old": "matomo_config_database_adapter", "new": "matomo_database_adapter" }
+    - { "old": "matomo_config_database_tables_prefix", "new": "matomo_database_tables_prefix" }
+    - { "old": "matomo_config_database_username", "new": "matomo_database_username" }
+    - { "old": "matomo_config_database_password", "new": "matomo_database_password" }
+    - { "old": "matomo_config_database_name", "new": "matomo_database_name" }
 
 - name: Fail if required matomo settings not defined
   ansible.builtin.fail:
@@ -30,9 +37,9 @@
     - {'name': 'matomo_uid', when: true}
     - {'name': 'matomo_gid', when: true}
     - {'name': 'mariadb_enabled', when: true}
-    - {'name': 'matomo_config_database_hostname', when: true}
-    - {'name': 'matomo_config_database_username', when: true}
-    - {'name': 'matomo_config_database_password', when: true}
+    - {'name': 'matomo_database_hostname', when: true}
+    - {'name': 'matomo_database_username', when: true}
+    - {'name': 'matomo_database_password', when: true}
     - {'name': 'matomo_container_labels_traefik_compression_middleware_name', when: "{{ matomo_container_labels_traefik_compression_middleware_enabled }}"}
 
 - name: Run if Traefik is enabled
