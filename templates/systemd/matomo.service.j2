@@ -32,8 +32,8 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
 			{% endif %}
 			--env-file={{ matomo_base_path }}/env \
 			--label-file={{ matomo_base_path }}/labels \
-			--mount type=bind,src={{ matomo_data_dir_path }},dst=/var/www/html \
-			--mount type=bind,src={{ matomo_config_dir_path }},dst=/var/www/html/config \
+			--mount type=bind,src={{ matomo_config_path }},dst=/var/www/html/config \
+			--mount type=bind,src={{ matomo_data_path }},dst=/var/www/html \
 			{{ matomo_container_image }}
 
 {% for network in matomo_container_additional_networks %}

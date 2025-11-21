@@ -15,8 +15,8 @@ matomo_enabled: true
 
 matomo_identifier: matomo
 matomo_base_path: "/{{ matomo_identifier }}"
-matomo_data_dir_path: "{{ matomo_base_path }}/data"
-matomo_config_dir_path: "{{ matomo_base_path }}/config"
+matomo_config_path: "{{ matomo_base_path }}/config"
+matomo_data_path: "{{ matomo_base_path }}/data"
 
 matomo_version: 5.3.1
 

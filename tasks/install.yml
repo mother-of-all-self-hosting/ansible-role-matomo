@@ -12,8 +12,8 @@
     group: "{{ matomo_gid }}"
   with_items:
     - "{{ matomo_base_path }}"
-    - "{{ matomo_data_dir_path }}"
-    - "{{ matomo_config_dir_path }}"
+    - "{{ matomo_config_path }}"
+    - "{{ matomo_data_path }}"
 
 - name: Ensure Matomo support files created
   ansible.builtin.template:
