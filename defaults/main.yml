@@ -20,13 +20,13 @@ matomo_data_path: "{{ matomo_base_path }}/data"
 
 matomo_version: 5.3.1
 
-matomo_uid: ''
-matomo_gid: ''
+matomo_uid: ""
+matomo_gid: ""
 
 matomo_scheme: https
 
 # The fully-qualified name of your Matomo server (e.g. `matomo.example.com`)
-matomo_hostname: ''
+matomo_hostname: ""
 
 matomo_path_prefix: /
 
@@ -59,7 +59,7 @@ matomo_container_additional_networks_custom: []
 #
 # To inject your own other container labels, see `matomo_container_labels_additional_labels`.
 matomo_container_labels_traefik_enabled: true
-matomo_container_labels_traefik_docker_network: ''
+matomo_container_labels_traefik_docker_network: ""
 matomo_container_labels_traefik_hostname: "{{ matomo_hostname }}"
 # The path prefix must either be `/` or not end with a slash (e.g. `/matomo`).
 matomo_container_labels_traefik_path_prefix: "{{ matomo_path_prefix }}"
@@ -105,7 +105,7 @@ matomo_container_labels_traefik_additional_response_headers_custom: {}
 # matomo_container_labels_additional_labels: |
 #   my.label=1
 #   another.label="here"
-matomo_container_labels_additional_labels: ''
+matomo_container_labels_additional_labels: ""
 
 # Specifies the value of the `X-XSS-Protection` header
 # Stops pages from loading when they detect reflected cross-site scripting (XSS) attacks.
@@ -168,12 +168,12 @@ matomo_systemd_wanted_services_list_custom: []
 
 # Matomo only supports Mysql/Mariadb
 matomo_config_database_adapter: mysql
-matomo_config_database_hostname: ''
+matomo_config_database_hostname: ""
 matomo_config_database_port: 3306
 matomo_config_database_name: matomo
-matomo_config_database_username: ''
-matomo_config_database_password: ''
-matomo_config_database_tables_prefix: ''
+matomo_config_database_username: ""
+matomo_config_database_password: ""
+matomo_config_database_tables_prefix: ""
 
 matomo_config_root_url: "{{ matomo_scheme }}://{{ matomo_hostname }}{{ matomo_path_prefix }}"
 
@@ -183,7 +183,7 @@ matomo_config_root_url: "{{ matomo_scheme }}://{{ matomo_hostname }}{{ matomo_pa
 # matomo_container_additional_environment_variables: |
 #   VAR=1
 #   ANOTHER=value
-matomo_container_additional_environment_variables: ''
+matomo_container_additional_environment_variables: ""
 
 # Additional environment variables.
-matomo_environment_variables_additional_variables: ''
+matomo_environment_variables_additional_variables: ""
