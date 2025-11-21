@@ -39,7 +39,6 @@
     - {'name': 'matomo_hostname', when: true}
     - {'name': 'matomo_uid', when: true}
     - {'name': 'matomo_gid', when: true}
-    - {'name': 'mariadb_enabled', when: true}
     - {'name': 'matomo_database_hostname', when: true}
     - {'name': 'matomo_database_username', when: true}
     - {'name': 'matomo_database_password', when: true}
