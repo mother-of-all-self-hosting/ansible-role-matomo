@@ -30,7 +30,7 @@
     - { "old": "matomo_config_database_password", "new": "matomo_database_password" }
     - { "old": "matomo_config_database_name", "new": "matomo_database_name" }
 
-- name: Fail if required matomo settings not defined
+- name: Fail if required Matomo settings not defined
   ansible.builtin.fail:
     msg: >-
       You need to define a required configuration setting (`{{ item.name }}`) for using this role.
@@ -47,7 +47,7 @@
 - name: Run if Traefik is enabled
   when: matomo_container_labels_traefik_enabled | bool
   block:
-    - name: Fail if required matomo Traefik settings not defined
+    - name: Fail if Traefik settings required for Matomo are not defined
       ansible.builtin.fail:
         msg: >-
           You need to define a required configuration setting (`{{ item }}`).
