@@ -34,7 +34,7 @@
   ansible.builtin.fail:
     msg: >-
       You need to define a required configuration setting (`{{ item.name }}`) for using this role.
-  when: "item.when | bool and (vars[item.name] is not defined or vars[item.name] | string | length == 0)"
+  when: "item.when | bool and lookup('vars', item.name, default='') | string | length == 0"
   with_items:
     - {'name': 'matomo_hostname', when: true}
     - {'name': 'matomo_uid', when: true}
