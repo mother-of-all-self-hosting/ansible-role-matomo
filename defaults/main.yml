@@ -179,5 +179,8 @@ matomo_database_password: ""
 matomo_database_name: matomo
 matomo_database_tables_prefix: matomo_
 
+# Specify the timezone
+matomo_environment_variables_tz: UTC
+
 # Additional environment variables.
 matomo_environment_variables_additional_variables: ""
