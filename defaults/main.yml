@@ -103,13 +103,16 @@ matomo_container_labels_traefik_additional_response_headers_auto: |
 matomo_container_labels_traefik_additional_response_headers_custom: {}
 
 # matomo_container_labels_additional_labels contains a multiline string with additional labels to add to the container label file.
-# See `roles/custom/matomo/templates/labels.j2` for details.
+# To add your own custom labels, use `matomo_container_labels_additional_labels_custom`
+# See `../templates/labels.j2` for details.
 #
 # Example:
 # matomo_container_labels_additional_labels: |
 #   my.label=1
 #   another.label="here"
-matomo_container_labels_additional_labels: ""
+matomo_container_labels_additional_labels: "{{ matomo_container_labels_additional_labels_auto | combine(matomo_container_labels_additional_labels_custom) }}"
+matomo_container_labels_additional_labels_auto: {}
+matomo_container_labels_additional_labels_custom: {}
 
 # Specifies the value of the `X-XSS-Protection` header
 # Stops pages from loading when they detect reflected cross-site scripting (XSS) attacks.
