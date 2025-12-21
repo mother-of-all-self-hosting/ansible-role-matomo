@@ -40,6 +40,9 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       --mount type=bind,src={{ matomo_data_path }},dst=/var/www/html \
       --tmpfs /var/run/apache2:rw,exec,nosuid,size=100M \
       --tmpfs /var/log/apache2:rw,exec,nosuid,size=100M \
+      {% for arg in matomo_container_extra_arguments %}
+      {{ arg }} \
+      {% endfor %}
       {{ matomo_container_image }}
 
 {% for network in matomo_container_additional_networks %}
