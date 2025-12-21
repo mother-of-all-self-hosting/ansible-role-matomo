@@ -29,7 +29,7 @@ matomo_scheme: https
 # The hostname at which Matomo is served
 matomo_hostname: ""
 
-# The path at which Matomo is exposed.
+# The path at which Matomo is served.
 # This value must either be `/` or not end with a slash (e.g. `/matomo`).
 matomo_path_prefix: /
 
