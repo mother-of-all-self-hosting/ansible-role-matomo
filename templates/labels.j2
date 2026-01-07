@@ -60,4 +60,6 @@ traefik.http.routers.{{ matomo_identifier }}.tls.certResolver={{ matomo_containe
 traefik.http.services.{{ matomo_identifier }}.loadbalancer.server.port={{ matomo_container_http_port }}
 {% endif %}
 
-{{ matomo_container_labels_additional_labels }}
+{% for arg in matomo_container_labels_additional_labels %}
+{{ arg }}
+{% endfor %}
