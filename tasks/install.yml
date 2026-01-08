@@ -19,9 +19,9 @@
   ansible.builtin.template:
     src: "{{ role_path }}/templates/{{ item }}.j2"
     dest: "{{ matomo_base_path }}/{{ item }}"
+    mode: "0640"
     owner: "{{ matomo_uid }}"
     group: "{{ matomo_gid }}"
-    mode: "0640"
   with_items:
     - env
     - labels
