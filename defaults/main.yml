@@ -24,9 +24,10 @@ matomo_version: 5.6.1
 matomo_uid: ""
 matomo_gid: ""
 
+# The scheme used for serving Matomo.
 matomo_scheme: https
 
-# The hostname at which Matomo is served
+# The hostname at which Matomo is served.
 matomo_hostname: ""
 
 # The path at which Matomo is served.
