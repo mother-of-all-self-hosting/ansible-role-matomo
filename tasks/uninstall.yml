@@ -30,6 +30,7 @@
       community.docker.docker_network:
         name: "{{ matomo_container_network }}"
         state: absent
+      register: matomo_network_deletion_result
 
     - name: Ensure Matomo container network does not exist via ansible.builtin.command
       when: devture_systemd_docker_base_container_network_creation_method == 'command'
@@ -37,8 +38,8 @@
         cmd: >-
           {{ devture_systemd_docker_base_host_command_docker }} network rm
           {{ matomo_container_network }}
-      register: network_deletion_result
-      changed_when: matomo_container_network in network_deletion_result.stdout
+      register: matomo_network_deletion_result
+      changed_when: matomo_container_network in matomo_network_deletion_result.stdout
 
     - name: Ensure Matomo path does not exist
       ansible.builtin.file:
