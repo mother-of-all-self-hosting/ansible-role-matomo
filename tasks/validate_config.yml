@@ -36,14 +36,14 @@
       You need to define a required configuration setting (`{{ item.name }}`) for using this role.
   when: "item.when | bool and lookup('vars', item.name, default='') | string | length == 0"
   with_items:
-    - {'name': 'matomo_uid', when: true}
-    - {'name': 'matomo_gid', when: true}
-    - {'name': 'matomo_hostname', when: true}
-    - {'name': 'matomo_container_network', when: true }
-    - {'name': 'matomo_database_hostname', when: true}
-    - {'name': 'matomo_database_username', when: true}
-    - {'name': 'matomo_database_password', when: true}
-    - {'name': 'matomo_container_labels_traefik_compression_middleware_name', when: "{{ matomo_container_labels_traefik_compression_middleware_enabled }}"}
+    - { "name": "matomo_uid", when: true }
+    - { "name": "matomo_gid", when: true }
+    - { "name": "matomo_hostname", when: true }
+    - { "name": "matomo_container_network", when: true }
+    - { "name": "matomo_database_hostname", when: true }
+    - { "name": "matomo_database_username", when: true }
+    - { "name": "matomo_database_password", when: true }
+    - { "name": "matomo_container_labels_traefik_compression_middleware_name", when: "{{ matomo_container_labels_traefik_compression_middleware_enabled }}" }
 
 - name: Run if Traefik is enabled
   when: matomo_container_labels_traefik_enabled | bool
