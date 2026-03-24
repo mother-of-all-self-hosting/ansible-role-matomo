@@ -1,10 +1,10 @@
-# SPDX-FileCopyrightText: 2023 - 2024 Nikita Chernyi
-# SPDX-FileCopyrightText: 2023 - 2025 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2023, 2024 Nikita Chernyi
+# SPDX-FileCopyrightText: 2023-2025 Slavi Pantaleev
 # SPDX-FileCopyrightText: 2024 Julian-Samuel Gebühr
 # SPDX-FileCopyrightText: 2024 Sergio Durigan Junior
 # SPDX-FileCopyrightText: 2025 MASH project contributors
 # SPDX-FileCopyrightText: 2025 Oliver
-# SPDX-FileCopyrightText: 2025 Suguru Hirahara
+# SPDX-FileCopyrightText: 2025, 2026 Suguru Hirahara
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -219,14 +219,37 @@ matomo_container_cleanup_command: |
   echo "Failed to remove stale container {{ matomo_identifier }} after {{ matomo_container_cleanup_timeout_seconds }} attempts" >&2;
   exit 1
 
-# Matomo only supports Mysql/Mariadb
-matomo_database_adapter: mysql
+########################################################################
+#                                                                      #
+# database                                                             #
+#                                                                      #
+########################################################################
+
+# Specify database configuration
 matomo_database_hostname: ""
 matomo_database_port: 3306
 matomo_database_username: matomo
 matomo_database_password: ""
 matomo_database_name: matomo
 matomo_database_tables_prefix: matomo_
+
+# Control if the database connection to MySQL is made via a Unix socket
+matomo_database_socket_enabled: true
+
+# Specify the path to the MySQL Unix socket path inside the FreshRSS container
+matomo_database_socket_path_container: /run-mysqld
+
+# Specify the path to the MySQL Unix socket path on the host (bind-mount source)
+matomo_database_socket_path_host: ""
+
+# Specify database host address and port or absolute path for Unix socket
+matomo_database_host: "{{ matomo_database_socket_path_container + '/mysqld.sock' if matomo_database_socket_enabled else matomo_database_hostname + ':' + matomo_database_port }}"
+
+########################################################################
+#                                                                      #
+# /database                                                            #
+#                                                                      #
+########################################################################
 
 # Specify the timezone
 matomo_environment_variables_tz: UTC

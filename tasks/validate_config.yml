@@ -1,8 +1,8 @@
 # SPDX-FileCopyrightText: 2023 Julian-Samuel Gebühr
 # SPDX-FileCopyrightText: 2023 MASH project contributors
-# SPDX-FileCopyrightText: 2023 - 2025 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2023-2025 Slavi Pantaleev
 # SPDX-FileCopyrightText: 2025 Oliver
-# SPDX-FileCopyrightText: 2025 Suguru Hirahara
+# SPDX-FileCopyrightText: 2025, 2026 Suguru Hirahara
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -40,9 +40,10 @@
     - { "name": "matomo_gid", when: true }
     - { "name": "matomo_hostname", when: true }
     - { "name": "matomo_container_network", when: true }
-    - { "name": "matomo_database_hostname", when: true }
+    - { "name": "matomo_database_hostname", when: "{{ not matomo_database_socket_enabled }}" }
     - { "name": "matomo_database_username", when: true }
     - { "name": "matomo_database_password", when: true }
+    - { "name": "matomo_database_socket_path_host", when: "{{ matomo_database_socket_enabled }}" }
     - { "name": "matomo_container_labels_traefik_compression_middleware_name", when: "{{ matomo_container_labels_traefik_compression_middleware_enabled }}" }
 
 - name: Run if Traefik is enabled
