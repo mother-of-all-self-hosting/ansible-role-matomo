@@ -236,7 +236,7 @@ matomo_database_tables_prefix: matomo_
 # Control if the database connection to MySQL is made via a Unix socket
 matomo_database_socket_enabled: true
 
-# Specify the path to the MySQL Unix socket path inside the FreshRSS container
+# Specify the path to the MySQL Unix socket path inside the Matomo container
 matomo_database_socket_path_container: /run-mysqld
 
 # Specify the path to the MySQL Unix socket path on the host (bind-mount source)
