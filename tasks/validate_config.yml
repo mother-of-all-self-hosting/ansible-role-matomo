@@ -39,6 +39,7 @@
     - { "name": "matomo_uid", when: true }
     - { "name": "matomo_gid", when: true }
     - { "name": "matomo_hostname", when: true }
+    - { "name": "matomo_path_prefix", when: true }
     - { "name": "matomo_container_network", when: true }
     - { "name": "matomo_database_hostname", when: "{{ not matomo_database_socket_enabled }}" }
     - { "name": "matomo_database_username", when: true }
