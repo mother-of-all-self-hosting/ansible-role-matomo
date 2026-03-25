@@ -42,7 +42,6 @@
     - { "name": "matomo_path_prefix", when: true }
     - { "name": "matomo_container_network", when: true }
     - { "name": "matomo_database_hostname", when: "{{ not matomo_database_socket_enabled }}" }
-    - { "name": "matomo_database_username", when: true }
     - { "name": "matomo_database_password", when: true }
     - { "name": "matomo_database_socket_path_host", when: "{{ matomo_database_socket_enabled }}" }
     - { "name": "matomo_container_labels_traefik_compression_middleware_name", when: "{{ matomo_container_labels_traefik_compression_middleware_enabled }}" }
