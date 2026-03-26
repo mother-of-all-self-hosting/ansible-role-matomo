@@ -37,7 +37,7 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       --label-file={{ matomo_base_path }}/labels \
       --mount type=bind,src={{ matomo_config_path }},dst=/var/www/html/config \
       --mount type=bind,src={{ matomo_data_path }},dst=/var/www/html \
-      {% if matomo_database_socket_enabled %}
+      {% if matomo_database_socket_enabled and matomo_database_socket_path_host != '' %}
       --mount type=bind,src={{ matomo_database_socket_path_host }},dst={{ matomo_database_socket_path_container }} \
       {% endif %}
       --tmpfs /var/run/apache2:rw,exec,nosuid,size={{ matomo_container_tmpfs_run_size }} \
