@@ -66,7 +66,9 @@ After adjusting the hostname, make sure to adjust your DNS records to point the 
 
 **Note**: hosting Matomo under a subpath (by configuring the `matomo_path_prefix` variable) does not seem to be possible due to Matomo's technical limitations.
 
-### Set variables for connecting to a MySQL-compatible database server
+### Configuring database
+
+#### Set variables for the database server
 
 To have the Matomo instance connect to your MySQL-compatible database server, add the following configuration to your `vars.yml` file.
 
@@ -76,7 +78,7 @@ matomo_database_password: YOUR_MYSQL_SERVER_PASSWORD_HERE
 matomo_database_name: YOUR_MYSQL_SERVER_DATABASE_NAME_HERE
 ```
 
-### Configuring connection to the database server (optional)
+#### Configuring connection to the database server (optional)
 
 By default the role is configured to establish connection with the the database server via the Unix socket. You can mount the Unix socket by adding the following configuration to your `vars.yml` file:
 
