@@ -243,7 +243,7 @@ matomo_database_socket_path_container: /run-mysqld
 matomo_database_socket_path_host: ""
 
 # Specify database host address and port or absolute path for Unix socket
-matomo_database_host: "{{ matomo_database_socket_path_container + '/mysqld.sock' if matomo_database_socket_enabled else matomo_database_hostname + ':' + matomo_database_port }}"
+matomo_database_host: "{{ matomo_database_socket_path_container + '/mysqld.sock' if matomo_database_socket_enabled else matomo_database_hostname + ':' + matomo_database_port | string }}"
 
 ########################################################################
 #                                                                      #
