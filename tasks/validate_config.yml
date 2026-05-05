@@ -29,6 +29,7 @@
     - { "old": "matomo_config_database_username", "new": "matomo_database_username" }
     - { "old": "matomo_config_database_password", "new": "matomo_database_password" }
     - { "old": "matomo_config_database_name", "new": "matomo_database_name" }
+    - { "old": "matomo_container_image_force_pull", "new": "<removed> (the new community.docker.docker_image_pull module handles this natively)" }
 
 - name: Fail if required Matomo settings not defined
   ansible.builtin.fail:

@@ -39,7 +39,6 @@ matomo_container_image_tag: "{{ matomo_version }}"
 matomo_container_image_registry_prefix: "{{ matomo_container_image_registry_prefix_upstream }}"
 matomo_container_image_registry_prefix_upstream: "{{ matomo_container_image_registry_prefix_upstream_default }}"
 matomo_container_image_registry_prefix_upstream_default: docker.io/
-matomo_container_image_force_pull: "{{ matomo_container_image.endswith(':latest') }}"
 
 # The base container network. It will be auto-created by this role if it doesn't exist already.
 matomo_container_network: "{{ matomo_identifier }}"
