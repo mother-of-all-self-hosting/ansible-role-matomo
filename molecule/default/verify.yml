@@ -1,0 +1,53 @@
+# SPDX-FileCopyrightText: 2026 Suguru Hirahara
+# SPDX-FileCopyrightText: 2026 spatterlight
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+---
+- name: Verify Matomo systemd service
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Wait for Matomo service to become active (up to 180s)
+      ansible.builtin.systemd:
+        name: matomo.service
+      register: matomo_service
+      until: matomo_service.status.ActiveState == 'active'
+      retries: 36
+      delay: 5
+
+    - name: Assert Matomo service is active
+      ansible.builtin.assert:
+        that: matomo_service.status.ActiveState == 'active'
+        fail_msg: "matomo.service not active ({{ matomo_service.status.ActiveState }})"
+        success_msg: "matomo.service is active"
+
+    - name: Retrieve Matomo service log for debugging
+      when: matomo_debug_service_enabled | bool
+      ansible.builtin.command:
+        cmd: journalctl -xeu matomo.service
+      changed_when: false
+
+    - name: Wait for Matomo HTTP endpoint to respond (up to 10m)
+      ansible.builtin.uri:
+        url: "http://localhost:80"
+        method: GET
+        status_code: [200, 302, 307]
+        follow_redirects: none
+      register: matomo_endpoint
+      until: matomo_endpoint.status in [200, 302, 307]
+      retries: 120
+      delay: 5
+
+    - name: Assert Matomo HTTP endpoint responds
+      ansible.builtin.assert:
+        that: matomo_endpoint.status in [200, 302, 307]
+        fail_msg: "Matomo did not respond as expected ({{ matomo_endpoint.status | default('no response') }})"
+        success_msg: "Matomo responded with {{ matomo_endpoint.status }}"
+
+    - name: Show Matomo systemd service status summary
+      ansible.builtin.debug:
+        msg:
+          - "Matomo systemd: {{ matomo_service.status.ActiveState }}"
+          - "Matomo HTTP: {{ matomo_endpoint.status }}"
