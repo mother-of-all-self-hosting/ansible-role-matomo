@@ -235,6 +235,14 @@ matomo_database_password: ""
 matomo_database_name: matomo
 matomo_database_tables_prefix: matomo_
 
+# Specify the adapter Matomo connects to the database with.
+#
+# The database settings this role passes to the container are what Matomo's
+# installation wizard offers as its defaults, and it only recognizes the two
+# adapters its own form lists (`PDO\MYSQL` and `MYSQLI`). Any other value is
+# silently ignored, leaving whoever runs the wizard to pick one by hand.
+matomo_database_adapter: 'PDO\MYSQL'
+
 # Control if the database connection to MySQL is made via a Unix socket
 matomo_database_socket_enabled: true
 

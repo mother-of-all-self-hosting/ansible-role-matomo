@@ -28,14 +28,21 @@
   vars:
     matomo_wizard_url: "{{ matomo_molecule_base_url }}/index.php"
 
+    # In the order `printenv` was asked for them below.
+    matomo_wizard_database_host: "{{ matomo_configured_database.stdout_lines[0] | trim }}"
+    matomo_wizard_database_adapter: "{{ matomo_configured_database.stdout_lines[1] | trim }}"
+
   tasks:
-    # The address Matomo has to reach the database at is a role default
-    # (`matomo_database_host`, a Unix socket path here) and role defaults are
-    # not in scope in this play. Reading it back out of the running container is
-    # both shorter than restating it and a stronger statement: the wizard is
-    # pointed at whatever the role actually configured, so a role that gets this
-    # wrong fails here instead of being papered over by a correct copy.
-    - name: Read the database address the role configured Matomo with
+    # The address Matomo has to reach the database at and the adapter it should
+    # use are role-computed values (`matomo_database_host` is a Unix socket path
+    # here), and role defaults are not in scope in this play. Reading them back
+    # out of the running container is both shorter than restating them and a
+    # stronger statement: the wizard is driven with whatever the role actually
+    # configured, so a role that gets either wrong fails here instead of being
+    # papered over by a correct copy. Matomo only accepts the adapters its own
+    # form lists, and answers 200 with a re-rendered form rather than the 302
+    # asserted below when it is handed anything else.
+    - name: Read the database settings the role configured Matomo with
       ansible.builtin.command:
         argv:
           - docker
@@ -43,14 +50,15 @@
           - "{{ matomo_identifier }}"
           - printenv
           - MATOMO_DATABASE_HOST
-      register: matomo_configured_database_host
+          - MATOMO_DATABASE_ADAPTER
+      register: matomo_configured_database
       changed_when: false
       # The container is started by systemd and `docker exec` fails while it is
       # still coming up, which on a first boot includes unpacking Matomo into
       # the bind-mounted data directory.
       retries: 60
       delay: 5
-      until: matomo_configured_database_host is not failed
+      until: matomo_configured_database is not failed
 
     # systemd reports the unit active as soon as `docker start` has not exited,
     # which is well before Apache and PHP are answering. This first request is
@@ -74,12 +82,12 @@
         method: POST
         body_format: form-urlencoded
         body:
-          host: "{{ matomo_configured_database_host.stdout | trim }}"
+          host: "{{ matomo_wizard_database_host }}"
           username: "{{ matomo_database_username }}"
           password: "{{ matomo_database_password }}"
           dbname: "{{ matomo_database_name }}"
           tables_prefix: "{{ matomo_database_tables_prefix }}"
-          adapter: 'PDO\MYSQL'
+          adapter: "{{ matomo_wizard_database_adapter }}"
           submit: Next
         headers:
           Cookie: "{{ matomo_wizard_session.cookies_string }}"
@@ -93,8 +101,11 @@
         fail_msg: >-
           The Matomo installer did not move on to creating tables
           (it went to {{ matomo_wizard_database.location | default('nowhere') }}) -
-          it could not connect to {{ matomo_configured_database_host.stdout | trim }}
-        success_msg: "The Matomo installer connected to {{ matomo_configured_database_host.stdout | trim }}"
+          it could not connect to {{ matomo_wizard_database_host }}
+          with the {{ matomo_wizard_database_adapter }} adapter
+        success_msg: >-
+          The Matomo installer connected to {{ matomo_wizard_database_host }}
+          with the {{ matomo_wizard_database_adapter }} adapter
 
     # This is the step that actually creates the schema, so it is a slow one.
     - name: Let Matomo create its database schema
@@ -180,7 +191,7 @@
     - name: Show the Matomo installation summary
       ansible.builtin.debug:
         msg:
-          - "Database: {{ matomo_configured_database_host.stdout | trim }} ({{ matomo_database_name }})"
+          - "Database: {{ matomo_wizard_database_host }} ({{ matomo_database_name }}, {{ matomo_wizard_database_adapter }})"
           - "Superuser: {{ matomo_molecule_superuser_login }}"
           - "Site: {{ matomo_molecule_site_name }} (idSite=1)"
           - "Installer left off at: {{ matomo_wizard_finished.location | default('nowhere') }}"
