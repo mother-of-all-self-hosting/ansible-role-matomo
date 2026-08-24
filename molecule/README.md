@@ -47,7 +47,14 @@ Currently there is one testing scenario available.
 
 ### `default`
 
-Tests a standard Matomo installation.
+Tests a standard Matomo installation, against a MariaDB database reached over a Unix socket.
+
+Matomo ships a multi-step installation wizard and answers `200` to everything until it has been walked through — the front page, the tracking endpoint and every Reporting API method all render the wizard's HTML, which even carries the version string. A scenario that only checked "the service is active" or "it responds with 200" would therefore pass against a Matomo that was never installed at all.
+
+So the scenario walks that wizard in its own step, and then checks things the wizard cannot answer:
+
+- `side_effect.yml` completes the installation non-interactively — it points Matomo at the database address the role configured (read back out of the running container), lets it create its schema, and creates a superuser and a first site. Each step is asserted on the redirect it answers with, so a rejected form fails here instead of leaving a half-installed Matomo behind.
+- `verify.yml` then mints an API token from the superuser credentials the wizard was given, asks the Reporting API for the version and compares it against the tag pinned in `defaults/main.yml`, tracks a pageview through the tracking endpoint, reads that same pageview back out of the Reporting API (both raw and archived), and finally reads the visit, the page title and the site out of the MariaDB database this scenario wired up.
 
 ## Running
 

@@ -1,17 +1,67 @@
 # SPDX-FileCopyrightText: 2026 spatterlight
+# SPDX-FileCopyrightText: 2026 Slavi Pantaleev
 # SPDX-FileCopyrightText: 2026 Suguru Hirahara
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-- name: Verify Matomo systemd service
+# What an uninstalled Matomo answers, measured against the 5.13.0 image before
+# `side_effect.yml` had walked its wizard, is why the checks below look the way
+# they do:
+#
+#   GET /                                        200, the wizard's HTML
+#   POST module=API&method=API.getMatomoVersion  200, the wizard's HTML, whose
+#                                                <title> is
+#                                                "Matomo 5.13.0 > Installation"
+#   POST module=API&method=UsersManager....      200, the wizard's HTML
+#   GET /matomo.php?idsite=1&rec=1&...           200
+#   the database                                 no tables at all
+#
+# Everything answers 200, and the wizard's own HTML even carries the version
+# string - so "it responded", "it responded 200" and "the version is in the
+# body" are all satisfied by a Matomo that has never been installed. The checks
+# here are picked to be ones that page cannot pass: a JSON content type, a token
+# minted from credentials that only exist once the wizard created them, a
+# pageview that has to survive a round trip through the database, and the rows
+# it leaves behind there.
+- name: Verify Matomo
   hosts: all
   become: true
   gather_facts: false
+
+  vars:
+    matomo_verify_url: "{{ matomo_molecule_base_url }}/index.php"
+
+    # Every page view of every visit Matomo reports, flattened into one list.
+    # Evaluated lazily, so it may name a variable that later tasks register.
+    matomo_verify_recorded_actions: "{{ matomo_live_visits.json | map(attribute='actionDetails') | flatten }}"
+
+    # The command prefix that runs a single SQL statement inside the database
+    # container this scenario started, printing bare values with no headers.
+    #
+    # The docker CLI is invoked directly rather than through community.docker.*:
+    # the ansible-lint environment used by pre-commit has no collections
+    # installed, so a collection module would fail the playbook syntax check.
+    matomo_verify_db_command: >-
+      docker exec {{ mariadb_identifier | default('mariadb') }}
+      mariadb --user={{ matomo_database_username | quote }}
+      --password={{ matomo_database_password | quote }}
+      --batch --skip-column-names {{ matomo_database_name | quote }} -e
+
   tasks:
+    # Role defaults are not in scope in a verify play, but the version that
+    # Renovate bumps lives in them and is what the running Matomo is checked
+    # against below. Only leaf literals may be read out of this namespace -
+    # anything Jinja-derived (`matomo_container_image_tag` and friends) would be
+    # resolved against an empty one.
+    - name: Load the Matomo role defaults
+      ansible.builtin.include_vars:
+        file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
+        name: matomo_defaults
+
     - name: Wait for Matomo service to become active (up to 180s)
       ansible.builtin.systemd:
-        name: matomo.service
+        name: "{{ matomo_identifier }}.service"
       register: matomo_service
       until: matomo_service.status.ActiveState == 'active'
       retries: 36
@@ -20,34 +70,247 @@
     - name: Assert Matomo service is active
       ansible.builtin.assert:
         that: matomo_service.status.ActiveState == 'active'
-        fail_msg: "matomo.service not active ({{ matomo_service.status.ActiveState }})"
-        success_msg: "matomo.service is active"
+        fail_msg: "{{ matomo_identifier }}.service not active ({{ matomo_service.status.ActiveState }})"
+        success_msg: "{{ matomo_identifier }}.service is active"
 
     - name: Retrieve Matomo service log for debugging
       when: matomo_debug_service_enabled | bool
       ansible.builtin.command:
-        cmd: journalctl -xeu matomo.service
+        cmd: "journalctl -xeu {{ matomo_identifier }}.service"
       changed_when: false
 
-    - name: Wait for Matomo HTTP endpoint to respond (up to 10m)
+    - name: Retrieve the Matomo front page
       ansible.builtin.uri:
-        url: "http://localhost:80"
+        url: "{{ matomo_verify_url }}"
         method: GET
-        status_code: [200, 302, 307]
+        status_code: [200]
         follow_redirects: none
-      register: matomo_endpoint
-      until: matomo_endpoint.status in [200, 302, 307]
-      retries: 120
+        return_content: true
+      register: matomo_front_page
+
+    # An installed Matomo serves its sign-in page here; an uninstalled one
+    # serves the wizard, with 200 either way. `window.piwik = {installation:
+    # true}` is what the wizard's layout sets and nothing else does, so its
+    # absence is the half of this that a wizard page cannot fake.
+    - name: Assert Matomo serves its sign-in page rather than its installation wizard
+      ansible.builtin.assert:
+        that:
+          - "'installation: true' not in matomo_front_page.content"
+          - "'form_login' in matomo_front_page.content"
+        fail_msg: "Matomo did not serve its sign-in page - it is still serving the installation wizard"
+        success_msg: "Matomo serves its sign-in page"
+
+    # Matomo mints an app-specific API token straight from a login and its
+    # password, with no token needed to ask. That makes this one request cover
+    # the whole chain the wizard put in place: the user row exists, its password
+    # hash matches, and the API is reachable rather than shadowed by the wizard.
+    #
+    # Matomo refuses `token_auth` in a query string, so this and every Reporting
+    # API call below go in a form-encoded body.
+    - name: Mint an API token as the superuser the installation created
+      ansible.builtin.uri:
+        url: "{{ matomo_verify_url }}"
+        method: POST
+        body_format: form-urlencoded
+        body:
+          module: API
+          format: json
+          method: UsersManager.createAppSpecificTokenAuth
+          userLogin: "{{ matomo_molecule_superuser_login }}"
+          passwordConfirmation: "{{ matomo_molecule_superuser_password }}"
+          description: molecule-verify
+        status_code: [200]
+        return_content: true
+      register: matomo_token_response
+
+    # The wizard answers 200 with `text/html` to this very request, so the
+    # content type is checked before anything reads `.json` - a bare
+    # "no attribute json" would say nothing about what went wrong.
+    - name: Assert Matomo answered the API rather than the installation wizard
+      ansible.builtin.assert:
+        that: "'application/json' in (matomo_token_response.content_type | default(''))"
+        fail_msg: >-
+          Matomo answered {{ matomo_token_response.content_type | default('nothing') }} instead of JSON -
+          the Reporting API is not reachable
+        success_msg: "Matomo answers the Reporting API with {{ matomo_token_response.content_type }}"
+
+    - name: Assert Matomo minted an API token for the superuser
+      ansible.builtin.assert:
+        that: (matomo_token_response.json.value | default('')) is match('^[0-9a-f]{32}$')
+        fail_msg: >-
+          Matomo did not mint a token for {{ matomo_molecule_superuser_login }}
+          ({{ matomo_token_response.json | to_json | truncate(200) }})
+        success_msg: "Matomo minted an API token for {{ matomo_molecule_superuser_login }}"
+
+    # Asking the Reporting API for the version ties the tag in defaults/main.yml
+    # to the Matomo that is actually running and actually installed. The wizard
+    # cannot answer this: it renders HTML here, and it takes a token that only
+    # exists once the wizard is done to get an answer at all.
+    - name: Ask the running Matomo for its version
+      ansible.builtin.uri:
+        url: "{{ matomo_verify_url }}"
+        method: POST
+        body_format: form-urlencoded
+        body:
+          module: API
+          format: json
+          method: API.getMatomoVersion
+          token_auth: "{{ matomo_token_response.json.value }}"
+        status_code: [200]
+        return_content: true
+      register: matomo_version_response
+
+    # A prefix match, because the image tag is what is pinned and Matomo may
+    # report a longer version string (a build suffix) under the same tag.
+    - name: Assert the running Matomo is the version this role installs
+      ansible.builtin.assert:
+        that: (matomo_version_response.json.value | default('')) is match(matomo_defaults.matomo_version | string | regex_escape)
+        fail_msg: >-
+          Matomo reports {{ matomo_version_response.json.value | default('nothing') }},
+          but defaults/main.yml pins {{ matomo_defaults.matomo_version }}
+        success_msg: "Matomo reports version {{ matomo_version_response.json.value }}"
+
+    # The point of Matomo is that it ingests pageviews and reports on them, so
+    # this is the check that makes the scenario about Matomo rather than about a
+    # PHP application that boots. An uninstalled Matomo answers this endpoint
+    # 200 as well - it has no site to reject the request on behalf of - but it
+    # answers 200 with the wizard's HTML, where an installed one answers 204
+    # with no body because `send_image=0` asked for no tracking pixel.
+    - name: Track a pageview through the Matomo tracking endpoint
+      ansible.builtin.uri:
+        url: >-
+          {{ matomo_molecule_base_url }}/matomo.php?idsite=1&rec=1&apiv=1&send_image=0&url={{
+          matomo_molecule_tracked_page_url | urlencode }}&action_name={{
+          matomo_molecule_tracked_page_title | urlencode }}&_id={{
+          matomo_molecule_tracked_visitor_id }}&rand=molecule
+        method: GET
+        status_code: [204]
+        follow_redirects: none
+      register: matomo_tracking
+
+    - name: Read the tracked visit back out of the Matomo Reporting API
+      ansible.builtin.uri:
+        url: "{{ matomo_verify_url }}"
+        method: POST
+        body_format: form-urlencoded
+        body:
+          module: API
+          format: json
+          method: Live.getLastVisitsDetails
+          idSite: "1"
+          period: day
+          date: today
+          token_auth: "{{ matomo_token_response.json.value }}"
+        status_code: [200]
+        return_content: true
+      register: matomo_live_visits
+      until: (matomo_live_visits.json | default([])) | length > 0
+      retries: 12
       delay: 5
 
-    - name: Assert Matomo HTTP endpoint responds
+    # The title and the URL are values nothing but this scenario would produce,
+    # so finding them in what Matomo reports means the pageview really made it
+    # through ingestion and back out again, rather than some visit existing.
+    - name: Assert Matomo reports the pageview that was tracked
       ansible.builtin.assert:
-        that: matomo_endpoint.status in [200, 302, 307]
-        fail_msg: "Matomo did not respond as expected ({{ matomo_endpoint.status | default('no response') }})"
-        success_msg: "Matomo responded with {{ matomo_endpoint.status }}"
+        that:
+          - matomo_molecule_tracked_page_title in (matomo_verify_recorded_actions | map(attribute='pageTitle') | list)
+          - matomo_molecule_tracked_page_url in (matomo_verify_recorded_actions | map(attribute='url') | list)
+          - matomo_molecule_tracked_visitor_id in (matomo_live_visits.json | map(attribute='visitorId') | list)
+        fail_msg: >-
+          Matomo does not report the tracked pageview - it reports
+          {{ matomo_verify_recorded_actions | map(attribute='pageTitle') | list | join(', ') | default('nothing', true) }}
+        success_msg: "Matomo reports the tracked pageview '{{ matomo_molecule_tracked_page_title }}'"
 
-    - name: Show Matomo systemd service status summary
+    # Live reports read the raw log tables. Asking for a summary metric instead
+    # makes Matomo archive that raw data into its report tables and read the
+    # result back, which is the other half of what it does with a pageview.
+    - name: Ask Matomo to summarise today's visits
+      ansible.builtin.uri:
+        url: "{{ matomo_verify_url }}"
+        method: POST
+        body_format: form-urlencoded
+        body:
+          module: API
+          format: json
+          method: VisitsSummary.getVisits
+          idSite: "1"
+          period: day
+          date: today
+          token_auth: "{{ matomo_token_response.json.value }}"
+        status_code: [200]
+        return_content: true
+      register: matomo_visits_summary
+
+    - name: Assert Matomo archived the tracked visit into a report
+      ansible.builtin.assert:
+        that: (matomo_visits_summary.json.value | default(0) | int) >= 1
+        fail_msg: >-
+          Matomo summarises today as {{ matomo_visits_summary.json.value | default('nothing') }} visits -
+          archiving did not pick the tracked visit up
+        success_msg: "Matomo summarises today as {{ matomo_visits_summary.json.value }} visit(s)"
+
+    # Everything above is answered by Matomo itself, which would say the same
+    # things if it had quietly found some other database. Looking into the one
+    # this scenario wired up is what rules that out.
+    - name: Read the tracked visit out of the database
+      ansible.builtin.command:
+        cmd: >-
+          {{ matomo_verify_db_command }}
+          {{ ('SELECT COUNT(*) FROM ' ~ matomo_database_tables_prefix ~ 'log_visit') | quote }}
+      register: matomo_db_visits
+      changed_when: false
+
+    - name: Assert the tracked visit landed in the database this scenario wired up
+      ansible.builtin.assert:
+        that: (matomo_db_visits.stdout | trim | int) >= 1
+        fail_msg: >-
+          {{ matomo_database_tables_prefix }}log_visit in '{{ matomo_database_name }}' holds
+          {{ matomo_db_visits.stdout | trim | default('nothing', true) }} rows - Matomo is not using this database
+        success_msg: >-
+          {{ matomo_database_tables_prefix }}log_visit in '{{ matomo_database_name }}' holds
+          {{ matomo_db_visits.stdout | trim }} row(s)
+
+    - name: Read the tracked page title out of the database
+      ansible.builtin.command:
+        cmd: >-
+          {{ matomo_verify_db_command }}
+          {{ ('SELECT name FROM ' ~ matomo_database_tables_prefix ~ 'log_action') | quote }}
+      register: matomo_db_actions
+      changed_when: false
+
+    - name: Assert the tracked page title was stored in that same database
+      ansible.builtin.assert:
+        that: matomo_molecule_tracked_page_title in (matomo_db_actions.stdout_lines | map('trim') | list)
+        fail_msg: >-
+          {{ matomo_database_tables_prefix }}log_action holds
+          {{ matomo_db_actions.stdout_lines | map('trim') | join(', ') | default('nothing', true) }},
+          not {{ matomo_molecule_tracked_page_title }}
+        success_msg: "{{ matomo_database_tables_prefix }}log_action holds {{ matomo_molecule_tracked_page_title }}"
+
+    - name: Read the site the installation created out of the database
+      ansible.builtin.command:
+        cmd: >-
+          {{ matomo_verify_db_command }}
+          {{ ('SELECT name FROM ' ~ matomo_database_tables_prefix ~ 'site') | quote }}
+      register: matomo_db_sites
+      changed_when: false
+
+    - name: Assert the site was created in that same database
+      ansible.builtin.assert:
+        that: matomo_molecule_site_name in (matomo_db_sites.stdout_lines | map('trim') | list)
+        fail_msg: >-
+          {{ matomo_database_tables_prefix }}site holds
+          {{ matomo_db_sites.stdout_lines | map('trim') | join(', ') | default('nothing', true) }},
+          not {{ matomo_molecule_site_name }}
+        success_msg: "{{ matomo_database_tables_prefix }}site holds {{ matomo_molecule_site_name }}"
+
+    - name: Show Matomo verification summary
       ansible.builtin.debug:
         msg:
           - "Matomo systemd: {{ matomo_service.status.ActiveState }}"
-          - "Matomo HTTP: {{ matomo_endpoint.status }}"
+          - "Matomo version: {{ matomo_version_response.json.value }} (pinned {{ matomo_defaults.matomo_version }})"
+          - "Matomo front page: {{ matomo_front_page.status }}, sign-in page"
+          - "Matomo tracking endpoint: {{ matomo_tracking.status }}"
+          - "Matomo reports: {{ matomo_visits_summary.json.value }} visit(s), '{{ matomo_molecule_tracked_page_title }}'"
+          - "Matomo database: '{{ matomo_database_name }}', {{ matomo_db_visits.stdout | trim }} visit row(s)"

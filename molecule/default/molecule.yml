@@ -32,16 +32,47 @@ provisioner:
         matomo_debug_service_enabled: false
 
         # Variables for Matomo
+        #
+        # `matomo_identifier` restates the role default so that `side_effect.yml`
+        # and `verify.yml` - which run as their own playbooks, without the role
+        # and therefore without its defaults in scope - can name the systemd
+        # service and the container from the inventory instead of hardcoding them.
+        matomo_identifier: matomo
         matomo_uid: 1000
         matomo_gid: 1000
         matomo_hostname: localhost
         matomo_container_labels_traefik_enabled: false
         matomo_container_http_host_bind_port: 80
 
+        # Matomo ships a multi-step installation wizard and answers 200 on
+        # everything until it has been walked through: `/`, the tracking
+        # endpoint and every Reporting API method all render the wizard's HTML.
+        # `side_effect.yml` completes that wizard with the values below, and
+        # `verify.yml` then signs in and reads data back with them, so both
+        # plays need them from the inventory rather than from facts.
+        matomo_molecule_base_url: http://localhost
+        matomo_molecule_superuser_login: molecule
+        matomo_molecule_superuser_password: molecule-probe-password
+        matomo_molecule_superuser_email: molecule@example.com
+        matomo_molecule_site_name: Molecule Probe
+        matomo_molecule_site_url: http://localhost
+        matomo_molecule_site_timezone: UTC
+
+        # The pageview `verify.yml` sends to the tracking endpoint and then
+        # reads back out of the Reporting API and the database. The values are
+        # deliberately unlike anything Matomo produces on its own, so that
+        # finding them again cannot be a coincidence.
+        matomo_molecule_tracked_page_title: MoleculeProbePageTitle
+        matomo_molecule_tracked_page_url: http://localhost/molecule-probe-page
+        # Quoted, because Matomo reports the visitor id back as a string and
+        # YAML would otherwise hand the comparison an integer.
+        matomo_molecule_tracked_visitor_id: "1122334455667788"
+
         # Variables required for Matomo to connect to the MariaDB database (via Unix socket)
         matomo_database_username: my_database_username
         matomo_database_password: my_database_password
         matomo_database_name: matomo
+        matomo_database_tables_prefix: matomo_
         matomo_database_socket_enabled: true
         matomo_database_socket_path_host: "{{ mariadb_run_path }}"
         matomo_systemd_required_services_list_auto: |
