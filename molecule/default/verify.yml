@@ -130,7 +130,7 @@
       ansible.builtin.assert:
         that: "'application/json' in (matomo_token_response.content_type | default(''))"
         fail_msg: >-
-          Matomo answered {{ matomo_token_response.content_type | default('nothing') }} instead of JSON -
+          Matomo answered {{ matomo_token_response.content_type | default('none') }} instead of JSON -
           the Reporting API is not reachable
         success_msg: "Matomo answers the Reporting API with {{ matomo_token_response.content_type }}"
 
@@ -244,7 +244,7 @@
       ansible.builtin.assert:
         that: (matomo_visits_summary.json.value | default(0) | int) >= 1
         fail_msg: >-
-          Matomo summarises today as {{ matomo_visits_summary.json.value | default('nothing') }} visits -
+          Matomo summarises today as {{ matomo_visits_summary.json.value | default('none') }} visits -
           archiving did not pick the tracked visit up
         success_msg: "Matomo summarises today as {{ matomo_visits_summary.json.value }} visit(s)"
 
