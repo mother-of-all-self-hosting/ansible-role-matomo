@@ -303,7 +303,7 @@
           not {{ matomo_molecule_site_name }}
         success_msg: "{{ matomo_database_tables_prefix }}site holds {{ matomo_molecule_site_name }}"
 
-    - name: Show Matomo verification summary
+    - name: Show the Matomo verification summary
       ansible.builtin.debug:
         msg:
           - "Matomo systemd: {{ matomo_service.status.ActiveState }}"

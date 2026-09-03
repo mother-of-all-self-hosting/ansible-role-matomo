@@ -191,7 +191,7 @@
     - name: Show the Matomo installation summary
       ansible.builtin.debug:
         msg:
-          - "Database: {{ matomo_wizard_database_host }} ({{ matomo_database_name }}, {{ matomo_wizard_database_adapter }})"
-          - "Superuser: {{ matomo_molecule_superuser_login }}"
-          - "Site: {{ matomo_molecule_site_name }} (idSite=1)"
-          - "Installer left off at: {{ matomo_wizard_finished.location | default('nowhere') }}"
+          - "Matomo database: {{ matomo_wizard_database_host }} ({{ matomo_database_name }}, {{ matomo_wizard_database_adapter }})"
+          - "Matomo superuser: {{ matomo_molecule_superuser_login }}"
+          - "Matomo site: {{ matomo_molecule_site_name }} (idSite=1)"
+          - "Matomo installer left off at: {{ matomo_wizard_finished.location | default('nowhere') }}"
