@@ -165,10 +165,8 @@
     - name: Assert the running Matomo is the version this role installs
       ansible.builtin.assert:
         that: (matomo_version_response.json.value | default('')) is match(matomo_defaults.matomo_version | string | regex_escape)
-        fail_msg: >-
-          Matomo reports {{ matomo_version_response.json.value | default('nothing') }},
-          but defaults/main.yml pins {{ matomo_defaults.matomo_version }}
-        success_msg: "Matomo reports version {{ matomo_version_response.json.value }}"
+        fail_msg: "Matomo reports {{ matomo_version_response.json.value | default('none') }}, expected {{ matomo_defaults.matomo_version }}"
+        success_msg: "Matomo reports {{ matomo_version_response.json.value }}"
 
     # The point of Matomo is that it ingests pageviews and reports on them, so
     # this is the check that makes the scenario about Matomo rather than about a
