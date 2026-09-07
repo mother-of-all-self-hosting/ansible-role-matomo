@@ -305,7 +305,7 @@
       ansible.builtin.debug:
         msg:
           - "Matomo systemd: {{ matomo_service.status.ActiveState }}"
-          - "Matomo version: {{ matomo_version_response.json.value }} (pinned {{ matomo_defaults.matomo_version }})"
+          - "Matomo version: {{ matomo_version_response.json.value }}"
           - "Matomo front page: {{ matomo_front_page.status }}, sign-in page"
           - "Matomo tracking endpoint: {{ matomo_tracking.status }}"
           - "Matomo reports: {{ matomo_visits_summary.json.value }} visit(s), '{{ matomo_molecule_tracked_page_title }}'"
