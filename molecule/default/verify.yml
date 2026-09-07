@@ -140,11 +140,11 @@
           ({{ matomo_token_response.json | to_json | truncate(200) }})
         success_msg: "Matomo minted an API token for {{ matomo_molecule_superuser_login }}"
 
-    # Asking the Reporting API for the version ties the tag in defaults/main.yml
+    # Querying the version of the Reporting API ties the tag in defaults/main.yml
     # to the Matomo that is actually running and actually installed. The wizard
     # cannot answer this: it renders HTML here, and it takes a token that only
     # exists once the wizard is done to get an answer at all.
-    - name: Ask the running Matomo for its version
+    - name: Query the version of the running Matomo
       ansible.builtin.uri:
         url: "{{ matomo_verify_url }}"
         method: POST
