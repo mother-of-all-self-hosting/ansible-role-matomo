@@ -162,15 +162,15 @@
           token_auth: "{{ matomo_token_response.json.value }}"
         status_code: [200]
         return_content: true
-      register: matomo_version_response
+      register: matomo_version_reported
 
     # A prefix match, because the image tag is what is pinned and Matomo may
     # report a longer version string (a build suffix) under the same tag.
     - name: Assert the running Matomo is the version this role installs
       ansible.builtin.assert:
-        that: (matomo_version_response.json.value | default('')) is match(matomo_defaults.matomo_version | string | regex_escape)
-        fail_msg: "Matomo reports {{ matomo_version_response.json.value | default('none') }}, expected {{ matomo_defaults.matomo_version }}"
-        success_msg: "Matomo reports {{ matomo_version_response.json.value }}"
+        that: (matomo_version_reported.json.value | default('')) is match(matomo_defaults.matomo_version | string | regex_escape)
+        fail_msg: "Matomo reports {{ matomo_version_reported.json.value | default('none') }}, expected {{ matomo_defaults.matomo_version }}"
+        success_msg: "Matomo reports {{ matomo_version_reported.json.value }}"
 
     # The point of Matomo is that it ingests pageviews and reports on them, so
     # this is the check that makes the scenario about Matomo rather than about a
@@ -311,7 +311,7 @@
       ansible.builtin.debug:
         msg:
           - "Matomo systemd: {{ matomo_service.status.ActiveState }}"
-          - "Matomo version: {{ matomo_version_response.json.value }}"
+          - "Matomo version: {{ matomo_version_reported.json.value }}"
           - "Matomo front page: {{ matomo_front_page.status }}, sign-in page"
           - "Matomo tracking endpoint: {{ matomo_tracking.status }}"
           - "Matomo reports: {{ matomo_visits_summary.json.value }} visit(s), '{{ matomo_molecule_tracked_page_title }}'"
