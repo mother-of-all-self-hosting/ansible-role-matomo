@@ -44,13 +44,9 @@
     # asserted below when it is handed anything else.
     - name: Read the database settings the role configured Matomo with
       ansible.builtin.command:
-        argv:
-          - docker
-          - exec
-          - "{{ matomo_identifier }}"
-          - printenv
-          - MATOMO_DATABASE_HOST
-          - MATOMO_DATABASE_ADAPTER
+        cmd: >-
+          docker exec {{ matomo_identifier }}
+          printenv MATOMO_DATABASE_HOST MATOMO_DATABASE_ADAPTER
       register: matomo_configured_database
       changed_when: false
       # The container is started by systemd and `docker exec` fails while it is
