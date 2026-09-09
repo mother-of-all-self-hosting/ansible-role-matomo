@@ -82,7 +82,7 @@
         - name: Retrieve the Matomo systemd service log for debugging
           when: matomo_debug_service_enabled | bool
           ansible.builtin.command:
-           cmd: "journalctl --no-pager --output=cat --unit={{ matomo_identifier }}.service"
+            cmd: "journalctl --no-pager --output=cat --unit={{ matomo_identifier }}.service"
           changed_when: false
 
         - name: Retrieve the Matomo front page
