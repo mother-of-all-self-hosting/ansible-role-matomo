@@ -61,7 +61,7 @@
 
         - name: Wait for the Matomo systemd service to become active (up to 180s)
           ansible.builtin.systemd_service:
-            name: "{{ matomo_identifier }}.service"
+            name: matomo.service
           register: matomo_service
           until: matomo_service.status.ActiveState == 'active'
           retries: 36
@@ -76,13 +76,13 @@
         - name: Assert the Matomo systemd service is active
           ansible.builtin.assert:
             that: matomo_service.status.ActiveState == 'active'
-            fail_msg: "{{ matomo_identifier }}.service is not active ({{ matomo_service.status.ActiveState }})"
-            success_msg: "{{ matomo_identifier }}.service is active"
+            fail_msg: "matomo.service is not active ({{ matomo_service.status.ActiveState }})"
+            success_msg: "matomo.service is active"
 
         - name: Retrieve the Matomo systemd service log for debugging
           when: matomo_debug_service_enabled | bool
           ansible.builtin.command:
-            cmd: "journalctl --no-pager --output=cat --unit={{ matomo_identifier }}.service"
+            cmd: journalctl --no-pager --output=cat --unit=matomo.service
           changed_when: false
 
         - name: Retrieve the Matomo front page
@@ -323,7 +323,7 @@
         # Whatever went wrong, the reason is almost always in the systemd service log.
         - name: Retrieve the Matomo systemd service log
           ansible.builtin.command:
-            cmd: "journalctl --no-pager --output=cat --unit={{ matomo_identifier }}.service"
+            cmd: "journalctl --no-pager --output=cat --unit=matomo.service"
           register: matomo_service_log
           changed_when: false
 

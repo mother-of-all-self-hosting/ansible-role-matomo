@@ -45,7 +45,7 @@
     - name: Read the database settings the role configured Matomo with
       ansible.builtin.command:
         cmd: >-
-          docker exec {{ matomo_identifier }}
+          docker exec matomo
           printenv MATOMO_DATABASE_HOST MATOMO_DATABASE_ADAPTER
       register: matomo_configured_database
       changed_when: false

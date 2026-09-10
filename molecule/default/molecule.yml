@@ -32,12 +32,6 @@ provisioner:
         matomo_debug_service_enabled: false
 
         # Variables for Matomo
-        #
-        # `matomo_identifier` restates the role default so that `side_effect.yml`
-        # and `verify.yml` - which run as their own playbooks, without the role
-        # and therefore without its defaults in scope - can name the systemd
-        # service and the container from the inventory instead of hardcoding them.
-        matomo_identifier: matomo
         matomo_uid: 1000
         matomo_gid: 1000
         matomo_hostname: localhost
