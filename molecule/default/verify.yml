@@ -48,6 +48,10 @@
       --password={{ matomo_database_password | quote }}
       --batch --skip-column-names {{ matomo_database_name | quote }} -e
 
+    matomo_verify_units:
+      - matomo.service
+      - mariadb.service
+
   tasks:
     - name: Verify that Matomo works
       block:
@@ -59,13 +63,14 @@
             file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
             name: matomo_defaults
 
-        - name: Wait for the Matomo systemd service to become active (up to 180s)
+        - name: Wait for the Matomo systemd services to become active (up to 180s each)
           ansible.builtin.systemd_service:
-            name: matomo.service
-          register: matomo_service
-          until: matomo_service.status.ActiveState == 'active'
+            name: "{{ item }}"
+          register: matomo_services
+          until: matomo_services.status.ActiveState == 'active'
           retries: 36
           delay: 5
+          loop: "{{ matomo_verify_units }}"
           # So that giving up is reported by the assertion below rather than as a
           # wall of systemd unit properties.
           failed_when: false
@@ -73,17 +78,20 @@
         # `Restart=always` in the systemd unit means that even a container which crashes
         # and gets restarted reads as active here, so this is a precondition rather than
         # a result.
-        - name: Assert the Matomo systemd service is active
+        - name: Assert the Matomo systemd services are active
           ansible.builtin.assert:
-            that: matomo_service.status.ActiveState == 'active'
-            fail_msg: "matomo.service is not active ({{ matomo_service.status.ActiveState }})"
-            success_msg: "matomo.service is active"
+            that: matomo_services.results | map(attribute='status.ActiveState') | unique | list == ['active']
+            fail_msg: >-
+              Not every service is active:
+              {{ dict(matomo_verify_units | zip(matomo_services.results | map(attribute='status.ActiveState'))) }}
+            success_msg: "Every systemd service is active"
 
-        - name: Retrieve the Matomo systemd service log for debugging
+        - name: Retrieve the Matomo systemd services log for debugging
           when: matomo_debug_service_enabled | bool
           ansible.builtin.command:
-            cmd: journalctl --no-pager --output=cat --unit=matomo.service
+            cmd: "journalctl --no-pager --output=cat --unit={{ item }}"
           changed_when: false
+          loop: "{{ matomo_verify_units }}"
 
         - name: Retrieve the Matomo front page
           ansible.builtin.uri:
@@ -312,7 +320,7 @@
         - name: Show the Matomo verification summary
           ansible.builtin.debug:
             msg:
-              - "Matomo systemd: {{ matomo_service.status.ActiveState }}"
+              - "Matomo systemd: {% for unit, state in matomo_verify_units | zip(matomo_services.results | map(attribute='status.ActiveState')) %}{{ unit }} ({{ state }}){% if not loop.last %}, {% endif %}{% endfor %}"
               - "Matomo version: {{ matomo_version_reported.json.value }}"
               - "Matomo front page: {{ matomo_front_page.status }}, sign-in page"
               - "Matomo tracking endpoint: {{ matomo_tracking.status }}"
