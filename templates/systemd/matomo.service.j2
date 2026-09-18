@@ -45,7 +45,10 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       {% for arg in matomo_container_extra_arguments %}
       {{ arg }} \
       {% endfor %}
-      {{ matomo_container_image }}
+      {{ matomo_container_image }} \
+      {% for arg in matomo_process_extra_arguments %}
+      {{ arg }} \
+      {% endfor %}
 
 {% for network in matomo_container_additional_networks %}
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} network connect {{ network }} {{ matomo_identifier }}
