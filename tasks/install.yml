@@ -71,7 +71,7 @@
       changed_when: matomo_network_creation_result.rc == 0
       failed_when: matomo_network_creation_result.rc != 0 and 'already exists' not in matomo_network_creation_result.stderr
 
-- name: Ensure Matomo systemd service installed
+- name: Ensure Matomo systemd service is present
   ansible.builtin.template:
     src: "{{ role_path }}/templates/systemd/matomo.service.j2"
     dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ matomo_identifier }}.service"
